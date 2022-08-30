@@ -13,6 +13,7 @@ import { app, BrowserWindow, shell, ipcMain } from 'electron';
 import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
 import { spawn } from 'child_process';
+import Store from 'electron-store';
 import MenuBuilder from './menu';
 import { resolveHtmlPath } from './util';
 
@@ -20,6 +21,7 @@ const PYTHON_PATH = app.isPackaged
   ? path.join(process.resourcesPath, 'assets/engine/main')
   : path.join(__dirname, '../../assets/engine/main');
 const spawnPy = spawn(PYTHON_PATH);
+const store = new Store();
 
 class AppUpdater {
   constructor() {
@@ -35,6 +37,15 @@ ipcMain.on('ipc-example', async (event, arg) => {
   const msgTemplate = (pingPong: string) => `IPC test: ${pingPong}`;
   console.log(msgTemplate(arg));
   event.reply('ipc-example', msgTemplate('pong'));
+});
+
+ipcMain.on('dbSet', async (event, [name, value]) => {
+  store.set(name, value);
+});
+
+ipcMain.on('getProjects', async (event) => {
+  const value = store.get('projects') || [];
+  event.reply('getProjects', value);
 });
 
 if (process.env.NODE_ENV === 'production') {
