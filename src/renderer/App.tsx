@@ -6,6 +6,7 @@ import {
 } from '@fluentui/react-components';
 import Home from './pages/Home';
 import './App.css';
+import Project from './pages/Project';
 
 const useStyles = makeStyles({
   main: {
@@ -24,6 +25,7 @@ export default function App() {
         <Router>
           <Routes>
             <Route path="/" element={<Home />} />
+            <Route path="/project/:id" element={<Project />} />
           </Routes>
         </Router>
       </div>
