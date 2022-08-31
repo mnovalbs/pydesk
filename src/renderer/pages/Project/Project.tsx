@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Project as IProject } from 'renderer/types/Project';
 import { Box, Wrapper } from 'renderer/components/Common';
+import ProjectCheckpoint from 'renderer/components/ProjectCheckpoint';
 
 const Project = () => {
   const { id } = useParams();
@@ -32,7 +33,7 @@ const Project = () => {
 
       <Box>
         {!selectedProject && <Alert intent="error">Project not found</Alert>}
-        {!!selectedProject && <div>Project Found!</div>}
+        {!!selectedProject && <ProjectCheckpoint />}
       </Box>
     </Wrapper>
   );
