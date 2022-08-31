@@ -1,6 +1,12 @@
 import { contextBridge, ipcRenderer, IpcRendererEvent } from 'electron';
 
-export type Channels = 'ipc-example' | 'dbSet' | 'dbGet' | 'getProjects';
+export type Channels =
+  | 'ipc-example'
+  | 'dbSet'
+  | 'dbGet'
+  | 'getProjects'
+  | 'loadDataset'
+  | 'showDataset';
 
 contextBridge.exposeInMainWorld('electron', {
   ipcRenderer: {

@@ -8,28 +8,37 @@ import { CheckpointItem, CheckpointListWrapper } from './styled-components';
 
 type Status = 'DONE' | 'IN_PROGRESS' | 'DISABLED';
 type Checkpoint = {
+  id: string;
   label: string;
   status: Status;
+};
+type CheckpointListProps = {
+  status: string;
 };
 
 const checkpoints: Checkpoint[] = [
   {
+    id: 'LOAD_DATASET',
     label: 'Load your dataset',
-    status: 'DONE',
+    status: 'DISABLED',
   },
   {
+    id: 'CHECK_DATASET',
     label: 'Check your dataset',
-    status: 'DONE',
+    status: 'DISABLED',
   },
   {
+    id: 'SELECT_AREA',
     label: 'Select your area',
-    status: 'IN_PROGRESS',
+    status: 'DISABLED',
   },
   {
+    id: 'CHECK_AREA',
     label: 'Check your area',
     status: 'DISABLED',
   },
   {
+    id: 'GENERATE_PREPROCESSING',
     label: 'Generate your pre-processing',
     status: 'DISABLED',
   },
@@ -50,11 +59,33 @@ const statusMap = {
   },
 };
 
-const CheckpointList = () => {
+const generateCheckpoints = (status: string): Checkpoint[] => {
+  let isChecked = false;
+  return checkpoints.map((checkpoint) => {
+    const { id } = checkpoint;
+    const isSelected = id === status;
+
+    isChecked = isChecked || isSelected;
+
+    let selectedStatus: Status = 'DISABLED';
+    if (!isChecked) {
+      selectedStatus = 'DONE';
+    } else if (isSelected) {
+      selectedStatus = 'IN_PROGRESS';
+    }
+
+    return {
+      ...checkpoint,
+      status: selectedStatus,
+    };
+  });
+};
+
+const CheckpointList = ({ status: checkpointStatus }: CheckpointListProps) => {
   return (
     <CheckpointListWrapper>
-      {checkpoints.map((checkpoint) => {
-        const { label, status } = checkpoint;
+      {generateCheckpoints(checkpointStatus).map((checkpoint) => {
+        const { status, label } = checkpoint;
         const { color, icon } = statusMap[status];
 
         return (

@@ -9,10 +9,14 @@
  * `./src/main.js` using webpack. This gives us some performance wins.
  */
 import path from 'path';
-import { app, BrowserWindow, shell, ipcMain } from 'electron';
+import fs from 'fs';
+import { v4 as uuidV4 } from 'uuid';
+import Papa from 'papaparse';
+import { app, BrowserWindow, shell, ipcMain, dialog } from 'electron';
 import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
 import { spawn } from 'child_process';
+import { Project } from 'renderer/types/Project';
 import Store from 'electron-store';
 import MenuBuilder from './menu';
 import { resolveHtmlPath } from './util';
@@ -31,6 +35,37 @@ class AppUpdater {
   }
 }
 
+const getProjects = (): Project[] => {
+  return (store.get('projects') || []) as Project[];
+};
+
+const getProject = (id: string) => {
+  const projects = getProjects();
+  return projects.find((project) => project.id === id);
+};
+
+const saveProject = (newProject: Project) => {
+  const projects = getProjects();
+  const newProjects = projects.map((project) => {
+    if (project.id === newProject.id) {
+      return newProject;
+    }
+    return project;
+  });
+  store.set('projects', newProjects);
+};
+
+const loadSavedDataset = (filePath: string) => {
+  return new Promise((resolve, reject) => {
+    const fileStream = fs.createReadStream(filePath);
+
+    Papa.parse(fileStream, {
+      complete: resolve,
+      error: reject,
+    });
+  });
+};
+
 let mainWindow: BrowserWindow | null = null;
 
 ipcMain.on('ipc-example', async (event, arg) => {
@@ -43,9 +78,51 @@ ipcMain.on('dbSet', async (event, [name, value]) => {
   store.set(name, value);
 });
 
+ipcMain.on('showDataset', (event, [projectId]) => {
+  const project = getProject(projectId);
+
+  if (!project?.datasetPath) {
+    return;
+  }
+
+  const dataset = loadSavedDataset(project.datasetPath);
+  event.reply('showDataset', dataset);
+});
+
+ipcMain.on('loadDataset', (event, [projectId]) => {
+  const project = getProject(projectId);
+
+  if (!project) {
+    return;
+  }
+
+  dialog
+    .showOpenDialog({
+      properties: ['openFile'],
+      filters: [{ name: 'CSV', extensions: ['csv'] }],
+    })
+    .then(async (result) => {
+      const [filePath] = result.filePaths;
+      const appPath = app.getAppPath();
+      const fileName = `${uuidV4()}.csv`;
+      const newFilePath = `${appPath}/${fileName}`;
+
+      fs.copyFileSync(filePath, newFilePath);
+      const updatedProject: Project = {
+        ...project,
+        datasetPath: newFilePath,
+      };
+
+      saveProject(updatedProject);
+      const dataset = await loadSavedDataset(newFilePath);
+      event.reply('datasetLoaded', dataset);
+    })
+    .catch(console.error);
+});
+
 ipcMain.on('getProjects', async (event) => {
-  const value = store.get('projects') || [];
-  event.reply('getProjects', value);
+  const projects = getProjects();
+  event.reply('getProjects', projects);
 });
 
 if (process.env.NODE_ENV === 'production') {

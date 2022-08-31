@@ -1,4 +1,5 @@
-import { Button, Divider, Subtitle1, Title2 } from '@fluentui/react-components';
+import { Button, Divider, Subtitle1 } from '@fluentui/react-components';
+import { Project } from 'renderer/types/Project';
 import { Box } from '../Common';
 import CheckpointList from './CheckpointList';
 import {
@@ -8,11 +9,21 @@ import {
   Subtitle,
 } from './styled-components';
 
-const ProjectCheckpoint = () => {
+interface ProjectCheckpointProps {
+  project: Project;
+}
+
+const ProjectCheckpoint = ({ project }: ProjectCheckpointProps) => {
+  const requestLoadDataset = () => {
+    window.electron.ipcRenderer.sendMessage('loadDataset', [project.id]);
+  };
+
+  const status = !project?.datasetPath ? 'LOAD_DATASET' : 'SELECT_AREA';
+
   return (
     <ProjectCheckpointWrapper>
       <ButtonActionWrapper>
-        <Button>Load your dataset</Button>
+        <Button onClick={requestLoadDataset}>Load your dataset</Button>
         <Button>Select your area</Button>
 
         <Divider />
@@ -27,7 +38,7 @@ const ProjectCheckpoint = () => {
           <Subtitle>
             <Subtitle1>Pipeline Modeling</Subtitle1>
           </Subtitle>
-          <CheckpointList />
+          <CheckpointList status={status} />
         </Box>
       </CheckpointWrapper>
     </ProjectCheckpointWrapper>

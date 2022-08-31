@@ -12,9 +12,15 @@ const Project = () => {
   const [projects, setProjects] = useState<IProject[]>([]);
   const navigate = useNavigate();
 
-  useEffect(() => {
+  const fetchProjects = () => {
     window.electron.ipcRenderer.sendMessage('getProjects', []);
     window.electron.ipcRenderer.once('getProjects', setProjects);
+  };
+
+  window.electron.ipcRenderer.once('datasetLoaded', fetchProjects);
+
+  useEffect(() => {
+    fetchProjects();
   }, []);
 
   const goToProjectList = () => navigate('/');
@@ -33,7 +39,7 @@ const Project = () => {
 
       <Box>
         {!selectedProject && <Alert intent="error">Project not found</Alert>}
-        {!!selectedProject && <ProjectCheckpoint />}
+        {!!selectedProject && <ProjectCheckpoint project={selectedProject} />}
       </Box>
     </Wrapper>
   );
