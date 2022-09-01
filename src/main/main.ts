@@ -86,7 +86,7 @@ ipcMain.on('saveDataset', (event, [projectId, dataset]) => {
 });
 
 ipcMain.on('createQrCode', async (event, [websiteUrl]) => {
-  const appPath = app.getAppPath();
+  const appPath = app.getPath('userData');
   const fileName = `${uuidV4()}.png`;
   const filePath = `${appPath}/${fileName}`;
 
@@ -120,7 +120,7 @@ ipcMain.on('loadDataset', (event, [projectId]) => {
     })
     .then(async (result) => {
       const [filePath] = result.filePaths;
-      const appPath = app.getAppPath();
+      const appPath = app.getPath('userData');
       const fileName = `${uuidV4()}.csv`;
       const newFilePath = `${appPath}/${fileName}`;
 
