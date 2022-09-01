@@ -30,6 +30,10 @@ const ProjectCheckpoint = ({ project }: ProjectCheckpointProps) => {
     navigate(`/project/${project.id}/training-model`);
   };
 
+  const goToAreaSelect = () => {
+    navigate(`/project/${project.id}/check-area`);
+  };
+
   const status = !project?.datasetPath ? 'LOAD_DATASET' : 'SELECT_AREA';
   const isCheckEnabled = !!project?.datasetPath;
 
@@ -37,21 +41,31 @@ const ProjectCheckpoint = ({ project }: ProjectCheckpointProps) => {
     <ProjectCheckpointWrapper>
       <ButtonActionWrapper>
         <ActionButtonWrapper>
-          <Button onClick={requestLoadDataset}>Load your dataset</Button>
+          <Button appearance="primary" onClick={requestLoadDataset}>
+            Load your dataset
+          </Button>
           <Button disabled={!isCheckEnabled} onClick={goToCheckDataset}>
             Check
           </Button>
         </ActionButtonWrapper>
         <ActionButtonWrapper>
-          <Button disabled={!isCheckEnabled}>Select your area</Button>
-          <Button disabled={!isCheckEnabled}>Check</Button>
+          <Button
+            appearance="primary"
+            disabled={!isCheckEnabled}
+            onClick={goToAreaSelect}
+          >
+            Select your area
+          </Button>
+          <Button disabled>Check</Button>
         </ActionButtonWrapper>
 
         <Divider />
 
-        <Button>Generate your pre-processing</Button>
-        <Button onClick={goToTrainingModel}>Training Model</Button>
-        <Button>Future Prediction</Button>
+        <Button disabled>Generate your pre-processing</Button>
+        <Button appearance="primary" onClick={goToTrainingModel}>
+          Training Model
+        </Button>
+        <Button disabled>Future Prediction</Button>
       </ButtonActionWrapper>
 
       <CheckpointWrapper>

@@ -9,6 +9,7 @@ import './App.css';
 import Project from './pages/Project';
 import DatasetCheck from './pages/DatasetCheck';
 import TrainingModel from './pages/TrainingModel';
+import SelectArea from './pages/SelectArea';
 
 const useStyles = makeStyles({
   main: {
@@ -33,6 +34,7 @@ export default function App() {
               path="/project/:id/training-model"
               element={<TrainingModel />}
             />
+            <Route path="/project/:id/check-area" element={<SelectArea />} />
           </Routes>
         </Router>
       </div>

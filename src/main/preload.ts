@@ -7,7 +7,8 @@ export type Channels =
   | 'getProjects'
   | 'loadDataset'
   | 'showDataset'
-  | 'saveDataset';
+  | 'saveDataset'
+  | 'createQrCode';
 
 contextBridge.exposeInMainWorld('electron', {
   ipcRenderer: {

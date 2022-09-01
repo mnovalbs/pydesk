@@ -11,12 +11,13 @@
 import path from 'path';
 import fs from 'fs';
 import { v4 as uuidV4 } from 'uuid';
-import { app, BrowserWindow, shell, ipcMain, dialog } from 'electron';
+import { app, BrowserWindow, shell, ipcMain, dialog, protocol } from 'electron';
 import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
 import { spawn } from 'child_process';
 import { Project } from 'renderer/types/Project';
 import Store from 'electron-store';
+import axios from 'axios';
 import MenuBuilder from './menu';
 import {
   getProject,
@@ -26,6 +27,10 @@ import {
   saveDataset,
   saveProject,
 } from './util';
+
+const api = axios.create({
+  baseURL: 'http://127.0.0.1:6001',
+});
 
 const PYTHON_PATH = app.isPackaged
   ? path.join(process.resourcesPath, 'assets/engine/main')
@@ -78,6 +83,27 @@ ipcMain.on('saveDataset', (event, [projectId, dataset]) => {
   };
 
   saveProject(updatedProject);
+});
+
+ipcMain.on('createQrCode', async (event, [websiteUrl]) => {
+  const appPath = app.getAppPath();
+  const fileName = `${uuidV4()}.png`;
+  const filePath = `${appPath}/${fileName}`;
+
+  try {
+    const { data } = await api({
+      method: 'POST',
+      url: '/qrcode',
+      data: {
+        app_path: filePath,
+        text: websiteUrl,
+      },
+    });
+
+    event.reply('createQrCode', data.app_path);
+  } catch (e) {
+    console.error('createQrCode Error', e);
+  }
 });
 
 ipcMain.on('loadDataset', (event, [projectId]) => {
@@ -206,7 +232,20 @@ app.on('window-all-closed', () => {
   // after all windows have been closed
   if (process.platform !== 'darwin') {
     app.quit();
+    spawnPy.kill('SIGKILL');
   }
+});
+
+app.on('ready', () => {
+  protocol.registerFileProtocol('local-protocol', (request, callback) => {
+    const url = request.url.replace('local-protocol://getMediaFile/', '');
+    try {
+      return callback(url);
+    } catch (error) {
+      console.error(error);
+      return callback('404');
+    }
+  });
 });
 
 app
