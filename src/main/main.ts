@@ -11,7 +11,6 @@
 import path from 'path';
 import fs from 'fs';
 import { v4 as uuidV4 } from 'uuid';
-import Papa from 'papaparse';
 import { app, BrowserWindow, shell, ipcMain, dialog } from 'electron';
 import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
@@ -19,7 +18,14 @@ import { spawn } from 'child_process';
 import { Project } from 'renderer/types/Project';
 import Store from 'electron-store';
 import MenuBuilder from './menu';
-import { resolveHtmlPath } from './util';
+import {
+  getProject,
+  getProjects,
+  loadSavedDataset,
+  resolveHtmlPath,
+  saveDataset,
+  saveProject,
+} from './util';
 
 const PYTHON_PATH = app.isPackaged
   ? path.join(process.resourcesPath, 'assets/engine/main')
@@ -35,37 +41,6 @@ class AppUpdater {
   }
 }
 
-const getProjects = (): Project[] => {
-  return (store.get('projects') || []) as Project[];
-};
-
-const getProject = (id: string) => {
-  const projects = getProjects();
-  return projects.find((project) => project.id === id);
-};
-
-const saveProject = (newProject: Project) => {
-  const projects = getProjects();
-  const newProjects = projects.map((project) => {
-    if (project.id === newProject.id) {
-      return newProject;
-    }
-    return project;
-  });
-  store.set('projects', newProjects);
-};
-
-const loadSavedDataset = (filePath: string) => {
-  return new Promise((resolve, reject) => {
-    const fileStream = fs.createReadStream(filePath);
-
-    Papa.parse(fileStream, {
-      complete: resolve,
-      error: reject,
-    });
-  });
-};
-
 let mainWindow: BrowserWindow | null = null;
 
 ipcMain.on('ipc-example', async (event, arg) => {
@@ -78,15 +53,31 @@ ipcMain.on('dbSet', async (event, [name, value]) => {
   store.set(name, value);
 });
 
-ipcMain.on('showDataset', (event, [projectId]) => {
+ipcMain.on('showDataset', async (event, [projectId]) => {
   const project = getProject(projectId);
 
   if (!project?.datasetPath) {
     return;
   }
 
-  const dataset = loadSavedDataset(project.datasetPath);
+  const dataset = await loadSavedDataset(project.datasetPath);
   event.reply('showDataset', dataset);
+});
+
+ipcMain.on('saveDataset', (event, [projectId, dataset]) => {
+  const project = getProject(projectId);
+
+  if (!project) {
+    return;
+  }
+
+  const newFilePath = saveDataset(dataset, project.datasetPath);
+  const updatedProject: Project = {
+    ...project,
+    datasetPath: newFilePath,
+  };
+
+  saveProject(updatedProject);
 });
 
 ipcMain.on('loadDataset', (event, [projectId]) => {

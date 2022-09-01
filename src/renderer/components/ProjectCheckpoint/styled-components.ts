@@ -11,6 +11,23 @@ export const ButtonActionWrapper = styled.div`
   flex-direction: column;
   gap: 15px;
   max-width: 300px;
+
+  button {
+    max-width: 100%;
+  }
+`;
+
+export const ActionButtonWrapper = styled.div`
+  display: flex;
+  gap: 15px;
+
+  & > button:first-child {
+    flex: 1;
+  }
+`;
+
+export const CheckButtonWrapper = styled.div`
+  max-width: 100px;
 `;
 
 export const CheckpointWrapper = styled.div`

@@ -12,3 +12,7 @@ export const Box = styled.div`
   min-height: 400px;
   padding: 30px;
 `;
+
+export const BoxScroll = styled.div`
+  overflow-x: auto;
+`;

@@ -7,6 +7,7 @@ import {
 import Home from './pages/Home';
 import './App.css';
 import Project from './pages/Project';
+import DatasetCheck from './pages/DatasetCheck';
 
 const useStyles = makeStyles({
   main: {
@@ -26,6 +27,7 @@ export default function App() {
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/project/:id" element={<Project />} />
+            <Route path="/project/:id/dataset" element={<DatasetCheck />} />
           </Routes>
         </Router>
       </div>

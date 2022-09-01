@@ -1,11 +1,9 @@
-import { Button, Title1 } from '@fluentui/react-components';
 import { Alert } from '@fluentui/react-components/unstable';
-import { ArrowLeft16Filled } from '@fluentui/react-icons';
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Project as IProject } from 'renderer/types/Project';
-import { Box, Wrapper } from 'renderer/components/Common';
 import ProjectCheckpoint from 'renderer/components/ProjectCheckpoint';
+import PageWrapper from 'renderer/components/Common/PageWrapper';
 
 const Project = () => {
   const { id } = useParams();
@@ -28,20 +26,10 @@ const Project = () => {
   const selectedProject = projects.find((project) => project.id === id);
 
   return (
-    <Wrapper>
-      <div>
-        <Button icon={<ArrowLeft16Filled />} onClick={goToProjectList}>
-          Back
-        </Button>
-      </div>
-
-      <Title1>Project: {selectedProject?.name || '-'}</Title1>
-
-      <Box>
-        {!selectedProject && <Alert intent="error">Project not found</Alert>}
-        {!!selectedProject && <ProjectCheckpoint project={selectedProject} />}
-      </Box>
-    </Wrapper>
+    <PageWrapper title={`Project: ${selectedProject?.name || '-'}`}>
+      {!selectedProject && <Alert intent="error">Project not found</Alert>}
+      {!!selectedProject && <ProjectCheckpoint project={selectedProject} />}
+    </PageWrapper>
   );
 };
 

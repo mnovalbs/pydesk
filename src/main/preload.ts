@@ -6,7 +6,8 @@ export type Channels =
   | 'dbGet'
   | 'getProjects'
   | 'loadDataset'
-  | 'showDataset';
+  | 'showDataset'
+  | 'saveDataset';
 
 contextBridge.exposeInMainWorld('electron', {
   ipcRenderer: {

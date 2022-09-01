@@ -1,8 +1,10 @@
 import { Button, Divider, Subtitle1 } from '@fluentui/react-components';
+import { useNavigate } from 'react-router-dom';
 import { Project } from 'renderer/types/Project';
 import { Box } from '../Common';
 import CheckpointList from './CheckpointList';
 import {
+  ActionButtonWrapper,
   ButtonActionWrapper,
   CheckpointWrapper,
   ProjectCheckpointWrapper,
@@ -14,17 +16,32 @@ interface ProjectCheckpointProps {
 }
 
 const ProjectCheckpoint = ({ project }: ProjectCheckpointProps) => {
+  const navigate = useNavigate();
+
   const requestLoadDataset = () => {
     window.electron.ipcRenderer.sendMessage('loadDataset', [project.id]);
   };
 
+  const goToCheckDataset = () => {
+    navigate(`/project/${project.id}/dataset`);
+  };
+
   const status = !project?.datasetPath ? 'LOAD_DATASET' : 'SELECT_AREA';
+  const isCheckEnabled = !!project?.datasetPath;
 
   return (
     <ProjectCheckpointWrapper>
       <ButtonActionWrapper>
-        <Button onClick={requestLoadDataset}>Load your dataset</Button>
-        <Button>Select your area</Button>
+        <ActionButtonWrapper>
+          <Button onClick={requestLoadDataset}>Load your dataset</Button>
+          <Button disabled={!isCheckEnabled} onClick={goToCheckDataset}>
+            Check
+          </Button>
+        </ActionButtonWrapper>
+        <ActionButtonWrapper>
+          <Button disabled={!isCheckEnabled}>Select your area</Button>
+          <Button disabled={!isCheckEnabled}>Check</Button>
+        </ActionButtonWrapper>
 
         <Divider />
 
