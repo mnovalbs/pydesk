@@ -26,6 +26,10 @@ const ProjectCheckpoint = ({ project }: ProjectCheckpointProps) => {
     navigate(`/project/${project.id}/dataset`);
   };
 
+  const goToTrainingModel = () => {
+    navigate(`/project/${project.id}/training-model`);
+  };
+
   const status = !project?.datasetPath ? 'LOAD_DATASET' : 'SELECT_AREA';
   const isCheckEnabled = !!project?.datasetPath;
 
@@ -46,7 +50,7 @@ const ProjectCheckpoint = ({ project }: ProjectCheckpointProps) => {
         <Divider />
 
         <Button>Generate your pre-processing</Button>
-        <Button>Training Model</Button>
+        <Button onClick={goToTrainingModel}>Training Model</Button>
         <Button>Future Prediction</Button>
       </ButtonActionWrapper>
 

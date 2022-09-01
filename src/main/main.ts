@@ -71,7 +71,7 @@ ipcMain.on('saveDataset', (event, [projectId, dataset]) => {
     return;
   }
 
-  const newFilePath = saveDataset(dataset, project.datasetPath);
+  const newFilePath = saveDataset(dataset, project.datasetPath!);
   const updatedProject: Project = {
     ...project,
     datasetPath: newFilePath,

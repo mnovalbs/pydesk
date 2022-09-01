@@ -16,8 +16,10 @@ const useStyles = makeStyles({
   input: {
     width: '100%',
   },
-  saveButton: {
-    marginTop: '10px',
+  saveButtonWrapper: {
+    marginTop: '20px',
+    display: 'flex',
+    justifyContent: 'end',
   },
 });
 
@@ -82,15 +84,13 @@ const DatasetCheck = () => {
             ))}
           </TableBody>
         </Table>
+      </BoxScroll>
 
-        <Button
-          className={classes.saveButton}
-          appearance="primary"
-          onClick={saveDataset}
-        >
+      <div className={classes.saveButtonWrapper}>
+        <Button appearance="primary" onClick={saveDataset}>
           Save Dataset
         </Button>
-      </BoxScroll>
+      </div>
     </PageWrapper>
   );
 };

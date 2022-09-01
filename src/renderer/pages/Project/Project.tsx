@@ -1,6 +1,6 @@
 import { Alert } from '@fluentui/react-components/unstable';
 import { useEffect, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { Project as IProject } from 'renderer/types/Project';
 import ProjectCheckpoint from 'renderer/components/ProjectCheckpoint';
 import PageWrapper from 'renderer/components/Common/PageWrapper';
@@ -8,7 +8,6 @@ import PageWrapper from 'renderer/components/Common/PageWrapper';
 const Project = () => {
   const { id } = useParams();
   const [projects, setProjects] = useState<IProject[]>([]);
-  const navigate = useNavigate();
 
   const fetchProjects = () => {
     window.electron.ipcRenderer.sendMessage('getProjects', []);
@@ -20,8 +19,6 @@ const Project = () => {
   useEffect(() => {
     fetchProjects();
   }, []);
-
-  const goToProjectList = () => navigate('/');
 
   const selectedProject = projects.find((project) => project.id === id);
 
