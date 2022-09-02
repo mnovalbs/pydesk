@@ -14,10 +14,11 @@ import { v4 as uuidV4 } from 'uuid';
 import { app, BrowserWindow, shell, ipcMain, dialog, protocol } from 'electron';
 import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
-import { spawn } from 'child_process';
+import { ChildProcessWithoutNullStreams, spawn } from 'child_process';
 import { Project } from 'renderer/types/Project';
 import Store from 'electron-store';
 import axios from 'axios';
+import rq from 'request-promise';
 import MenuBuilder from './menu';
 import {
   getProject,
@@ -28,8 +29,10 @@ import {
   saveProject,
 } from './util';
 
+const PYTHON_API_URL = 'http://127.0.0.1:6001';
+
 const api = axios.create({
-  baseURL: 'http://127.0.0.1:6001',
+  baseURL: PYTHON_API_URL,
 });
 
 const PYTHON_PATH = app.isPackaged
@@ -167,7 +170,7 @@ const installExtensions = async () => {
     .catch(console.log);
 };
 
-const createWindow = async () => {
+const createWindow = async (pythonProcess: ChildProcessWithoutNullStreams) => {
   if (isDebug) {
     await installExtensions();
   }
@@ -207,6 +210,11 @@ const createWindow = async () => {
 
   mainWindow.on('closed', () => {
     mainWindow = null;
+
+    if (pythonProcess) {
+      console.log('kill python process');
+      pythonProcess.kill('SIGINT');
+    }
   });
 
   const menuBuilder = new MenuBuilder(mainWindow);
@@ -232,7 +240,6 @@ app.on('window-all-closed', () => {
   // after all windows have been closed
   if (process.platform !== 'darwin') {
     app.quit();
-    spawnPy.kill('SIGKILL');
   }
 });
 
@@ -248,14 +255,39 @@ app.on('ready', () => {
   });
 });
 
+const waitTime = (time = 5) => {
+  return new Promise((resolve) =>
+    setTimeout(() => {
+      return resolve('OK!');
+    }, time * 1000)
+  );
+};
+
+const startUp = async (errorCount = 0) => {
+  try {
+    console.log('wait python server');
+    await waitTime(5);
+    await rq(PYTHON_API_URL);
+    console.log('python ready');
+    createWindow(spawnPy);
+  } catch (e: any) {
+    console.error('python error', e.message);
+    if (errorCount < 5) {
+      startUp(errorCount + 1);
+    } else {
+      throw Error('max error exceeded');
+    }
+  }
+};
+
 app
   .whenReady()
   .then(() => {
-    createWindow();
+    startUp();
     app.on('activate', () => {
       // On macOS it's common to re-create a window in the app when the
       // dock icon is clicked and there are no other windows open.
-      if (mainWindow === null) createWindow();
+      if (mainWindow === null) startUp();
     });
   })
   .catch(console.log);
