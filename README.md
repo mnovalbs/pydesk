@@ -1,4 +1,6 @@
-![Screenshot](screenshot.png)
+<p align="center">
+  <img src="screenshots/screenshot.png" />
+</p>
 
 ## Prerequisite
 - [Install NodeJS](https://nodejs.org/en/download/package-manager)
@@ -92,3 +94,13 @@ npm run package
 ```
 
 your package will be built under `release/build` directory
+
+## How this works
+<p align="center">
+  <img src="screenshots/how-this-works.png" width="200" />
+</p>
+
+1. Inside the electron main, this app will run python as new child process
+2. Python app will create a local server at `127.0.0.1:PORT`
+3. Then, will render ReactJS as a main display and interaction
+4. React app also can call the python API endpoint to get the data
