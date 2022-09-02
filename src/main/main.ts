@@ -38,7 +38,13 @@ const api = axios.create({
 const PYTHON_PATH = app.isPackaged
   ? path.join(process.resourcesPath, 'assets/engine/main')
   : path.join(__dirname, '../../assets/engine/main');
-const spawnPy = spawn(PYTHON_PATH);
+
+let spawnPy: ChildProcessWithoutNullStreams;
+if (app.isPackaged) {
+  console.log('isPackaged');
+  spawnPy = spawn(PYTHON_PATH);
+}
+
 const store = new Store();
 
 class AppUpdater {
